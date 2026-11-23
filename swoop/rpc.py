@@ -357,6 +357,7 @@ def _get_client(proxy: Optional[str] = None, impersonate: Optional[str] = None) 
 
     Maintains separate Client instances per (proxy, impersonate) so that different
     proxy routes and fingerprint profiles don't interfere with each other.
+    An empty impersonation value creates a client without a browser profile.
 
     Thread-safe: protected by `_clients_lock` so concurrent first-misses
     from `_fetch_deals_per_origin`'s ThreadPoolExecutor don't race on
@@ -365,15 +366,17 @@ def _get_client(proxy: Optional[str] = None, impersonate: Optional[str] = None) 
     from primp import Client
 
     effective_proxy = proxy if proxy is not None else _default_proxy
-    effective_impersonate = impersonate or "chrome"
-    key = f"{effective_proxy or ''}|{effective_impersonate}"
+    effective_impersonate = "chrome" if impersonate is None else impersonate
+    key = f"{effective_proxy or ''}|{effective_impersonate or '<none>'}"
     with _clients_lock:
         if key not in _clients:
             # Evict oldest entry if cache is full to prevent unbounded growth
             # when callers rotate through many proxy URLs or impersonate profiles.
             if len(_clients) >= _MAX_CLIENTS:
                 _clients.pop(next(iter(_clients)))
-            kwargs: dict[str, Any] = {"impersonate": effective_impersonate}
+            kwargs: dict[str, Any] = {}
+            if effective_impersonate:
+                kwargs["impersonate"] = effective_impersonate
             if effective_proxy:
                 kwargs["proxy"] = effective_proxy
             _clients[key] = Client(**kwargs)

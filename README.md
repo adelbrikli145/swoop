@@ -156,6 +156,12 @@ print(results.is_complete)
 
 Each price-check call costs ~2 RPCs (one search, one booking lookup) — including one-way trips, so `PriceResult.booking_options` is populated and `booking_url` is available. For high-volume scoring of many fares, expect rate-limit pressure to scale accordingly; increase `retries` or pace your calls.
 
+### Experimental Air Algérie monitor
+
+`.github/workflows/air-algerie-monitor.yml` and `scripts/monitor_air_algerie.py` provide a fail-closed, five-minute GitHub Actions monitor for AH6354 from CZL to DJG on 2026-12-23 and 2026-12-27. It sends Telegram only for an exact, confirmed, bookable Economy option; estimates, unknown cabin classes, premium brands, other itineraries, and missing booking links are rejected. A separate cache key per date prevents repeat alerts.
+
+The workflow is **disabled by default**. Before enabling it, add repository Actions secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, then set the Actions variable `AIR_ALGERIE_MONITOR_ENABLED` to `true`. GitHub scheduled runs are best-effort, not guaranteed to start exactly every five minutes. This monitor is not considered operational until a live booking lookup and a real Telegram delivery both succeed. It uses Swoop's undocumented Google Flights RPC with no browser impersonation profile; upstream errors stop the check without sending an availability alert.
+
 <details>
 <summary>More Examples</summary>
 

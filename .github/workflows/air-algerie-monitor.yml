@@ -1,0 +1,53 @@
+name: Air Algérie availability monitor
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    if: vars.AIR_ALGERIE_MONITOR_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    concurrency:
+      group: air-algerie-ah6354-${{ matrix.flight_date }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        flight_date:
+          - "2026-12-23"
+          - "2026-12-27"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install Swoop
+        run: python -m pip install .
+      - name: Restore duplicate-alert state
+        id: restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/air-algerie-state
+          key: air-algerie-ah6354-${{ matrix.flight_date }}-v1
+      - name: Check confirmed Economy availability
+        id: monitor
+        if: steps.restore.outputs.cache-hit != 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: >-
+          python scripts/monitor_air_algerie.py
+          --date "${{ matrix.flight_date }}"
+          --state-dir "${{ runner.temp }}/air-algerie-state"
+      - name: Save duplicate-alert state
+        if: steps.restore.outputs.cache-hit != 'true' && steps.monitor.outputs.sent == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/air-algerie-state
+          key: air-algerie-ah6354-${{ matrix.flight_date }}-v1

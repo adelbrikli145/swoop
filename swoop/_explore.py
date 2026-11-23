@@ -349,7 +349,8 @@ def fetch_explore(
     client = _get_client(transport.proxy, transport.impersonate)
     page_url = _apply_country(EXPLORE_PAGE_URL, transport.country)
     rpc_base = _apply_country(EXPLORE_RPC_URL, transport.country)
-    cache_key = f"{transport.proxy or ''}|{transport.impersonate or ''}|{transport.country or ''}"
+    profile_key = "<none>" if transport.impersonate == "" else transport.impersonate or ""
+    cache_key = f"{transport.proxy or ''}|{profile_key}|{transport.country or ''}"
 
     body = _encode_explore_f_req(
         _build_explore_payload(
