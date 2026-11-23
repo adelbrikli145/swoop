@@ -20,7 +20,11 @@ class Passengers:
 
 @dataclass
 class TransportConfig:
-    """HTTP transport configuration for API requests."""
+    """HTTP transport configuration for API requests.
+
+    ``impersonate=None`` keeps swoop's default Chrome TLS profile.
+    Pass an empty string to use primp without a browser impersonation profile.
+    """
 
     timeout: int = 90
     retries: int = 2

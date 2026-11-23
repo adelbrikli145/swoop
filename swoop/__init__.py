@@ -632,7 +632,10 @@ def _fetch_deals_per_origin(
         # via _get_client and the concurrent _establish_session GETs
         # interleave-overwrite Google's session cookies mid-flight,
         # leading to mismatched-session POSTs and transient empty deals.
-        kwargs: dict = {"impersonate": transport.impersonate or "chrome"}
+        kwargs: dict = {}
+        impersonate = "chrome" if transport.impersonate is None else transport.impersonate
+        if impersonate:
+            kwargs["impersonate"] = impersonate
         if transport.proxy:
             kwargs["proxy"] = transport.proxy
         worker_client = Client(**kwargs)

@@ -156,6 +156,12 @@ print(results.is_complete)
 
 Each price-check call costs ~2 RPCs (one search, one booking lookup) — including one-way trips, so `PriceResult.booking_options` is populated and `booking_url` is available. For high-volume scoring of many fares, expect rate-limit pressure to scale accordingly; increase `retries` or pace your calls.
 
+### Experimental Air Algérie monitor
+
+`.github/workflows/air-algerie-monitor.yml` currently runs only the monitor's offline safety tests on pull requests and manual dispatches. It does not perform flight searches, read Telegram secrets, or send messages. The fail-closed monitor implementation in `scripts/monitor_air_algerie.py` accepts only an exact, confirmed, bookable Economy option; estimates, unknown cabin classes, premium brands, other itineraries, and missing booking links are rejected.
+
+The live monitor is **not enabled or scheduled** because a genuine Air Algérie Economy booking source has not been confirmed. Keep the repository Actions variable `AIR_ALGERIE_MONITOR_ENABLED` set to `false`; do not add Telegram secrets or enable live checks until the source and end-to-end booking are verified. The implementation uses Swoop's undocumented Google Flights RPC with no browser impersonation profile; upstream errors stop the check without sending an availability alert.
+
 <details>
 <summary>More Examples</summary>
 

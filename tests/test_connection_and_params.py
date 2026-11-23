@@ -206,6 +206,26 @@ class TestGetClient:
         rpc._get_client(impersonate=None)
         MockClient.assert_called_once_with(impersonate="chrome")
 
+    @patch("primp.Client")
+    def test_empty_impersonate_uses_unprofiled_client(self, MockClient):
+        mock = MagicMock()
+        MockClient.return_value = mock
+
+        client = rpc._get_client(impersonate="")
+
+        assert client is mock
+        MockClient.assert_called_once_with()
+
+    @patch("primp.Client")
+    def test_profiled_and_unprofiled_clients_are_separate(self, MockClient):
+        MockClient.side_effect = [MagicMock(), MagicMock()]
+
+        profiled = rpc._get_client(impersonate="chrome")
+        unprofiled = rpc._get_client(impersonate="")
+
+        assert profiled is not unprofiled
+        assert MockClient.call_count == 2
+
 
 # ---------------------------------------------------------------------------
 # Passenger types reach the RPC payload
