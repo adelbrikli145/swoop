@@ -158,9 +158,9 @@ Each price-check call costs ~2 RPCs (one search, one booking lookup) — includi
 
 ### Experimental Air Algérie monitor
 
-`.github/workflows/air-algerie-monitor.yml` and `scripts/monitor_air_algerie.py` provide a fail-closed, five-minute GitHub Actions monitor for AH6354 from CZL to DJG on 2026-12-23 and 2026-12-27. It sends Telegram only for an exact, confirmed, bookable Economy option; estimates, unknown cabin classes, premium brands, other itineraries, and missing booking links are rejected. A separate cache key per date prevents repeat alerts.
+`.github/workflows/air-algerie-monitor.yml` currently runs only the monitor's offline safety tests on pull requests and manual dispatches. It does not perform flight searches, read Telegram secrets, or send messages. The fail-closed monitor implementation in `scripts/monitor_air_algerie.py` accepts only an exact, confirmed, bookable Economy option; estimates, unknown cabin classes, premium brands, other itineraries, and missing booking links are rejected.
 
-The workflow is **disabled by default**. Before enabling it, add repository Actions secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, then set the Actions variable `AIR_ALGERIE_MONITOR_ENABLED` to `true`. GitHub scheduled runs are best-effort, not guaranteed to start exactly every five minutes. This monitor is not considered operational until a live booking lookup and a real Telegram delivery both succeed. It uses Swoop's undocumented Google Flights RPC with no browser impersonation profile; upstream errors stop the check without sending an availability alert.
+The live monitor is **not enabled or scheduled** because a genuine Air Algérie Economy booking source has not been confirmed. Keep the repository Actions variable `AIR_ALGERIE_MONITOR_ENABLED` set to `false`; do not add Telegram secrets or enable live checks until the source and end-to-end booking are verified. The implementation uses Swoop's undocumented Google Flights RPC with no browser impersonation profile; upstream errors stop the check without sending an availability alert.
 
 <details>
 <summary>More Examples</summary>
